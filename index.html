@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conical Frustum Perspective & Development</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+
+    canvas {
+      border: 1px solid #000;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .canvas-container {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .canvas-container canvas {
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Conical Frustum Perspective & Development Surface</h1>
+  <div class="canvas-container">
+    <canvas id="perspectiveCanvas" width="600" height="600"></canvas>
+    <canvas id="developmentCanvas" width="600" height="600"></canvas>
+  </div>
+</div>
+
+<script>
+// Get the canvas elements and context
+const perspectiveCanvas = document.getElementById('perspectiveCanvas');
+const perspectiveCtx = perspectiveCanvas.getContext('2d');
+
+const developmentCanvas = document.getElementById('developmentCanvas');
+const developmentCtx = developmentCanvas.getContext('2d');
+
+// Perspective View: Elliptical top and bottom (Conical Frustum Perspective)
+const topEllipseWidth = 220; // Semi-major axis of top ellipse
+const topEllipseHeight = 100; // Semi-minor axis of top ellipse
+const bottomEllipseWidth = 300; // Semi-major axis of bottom ellipse
+const bottomEllipseHeight = 130; // Semi-minor axis of bottom ellipse
+
+const centerX = perspectiveCanvas.width / 2;
+const centerY = perspectiveCanvas.height / 2;
+const perspectiveOffset = 180; // Increased offset to fit both ellipses
+
+// Function to draw an ellipse
+function drawEllipse(ctx, x, y, width, height, rotation = 0) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
+  ctx.beginPath();
+  ctx.ellipse(0, 0, width, height, 0, 0, 2 * Math.PI);
+  ctx.stroke();
+  ctx.restore();
+}
+
+// Draw perspective view of the Conical Frustum
+perspectiveCtx.clearRect(0, 0, perspectiveCanvas.width, perspectiveCanvas.height);
+
+// Draw the top ellipse
+drawEllipse(perspectiveCtx, centerX, centerY - perspectiveOffset, topEllipseWidth, topEllipseHeight);
+
+// Draw the bottom ellipse
+drawEllipse(perspectiveCtx, centerX, centerY + perspectiveOffset, bottomEllipseWidth, bottomEllipseHeight);
+
+// Draw the left and right edges (sides of the frustum)
+const topLeftX = centerX - topEllipseWidth;
+const topRightX = centerX + topEllipseWidth;
+const bottomLeftX = centerX - bottomEllipseWidth;
+const bottomRightX = centerX + bottomEllipseWidth;
+const topY = centerY - perspectiveOffset;
+const bottomY = centerY + perspectiveOffset;
+
+// Left edge (from top to bottom ellipse)
+perspectiveCtx.beginPath();
+perspectiveCtx.moveTo(topLeftX, topY);
+perspectiveCtx.lineTo(bottomLeftX, bottomY);
+perspectiveCtx.stroke();
+
+// Right edge (from top to bottom ellipse)
+perspectiveCtx.beginPath();
+perspectiveCtx.moveTo(topRightX, topY);
+perspectiveCtx.lineTo(bottomRightX, bottomY);
+perspectiveCtx.stroke();
+
+// Development Surface (Unfolding the frustum into a sector)
+// Let's define the radii and slant height
+const topRadius = topEllipseWidth;
+const bottomRadius = bottomEllipseWidth;
+const slantHeight = 200; // Arbitrary slant height for the frustum
+const developmentCenterX = developmentCanvas.width / 2;
+const developmentCenterY = developmentCanvas.height / 2;
+
+// Function to draw a sector (representing the development surface of the frustum)
+function drawSector(ctx, x, y, radius, angle, startAngle = 0) {
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.arc(x, y, radius, startAngle, startAngle + angle);
+  ctx.closePath();
+  ctx.stroke();
+}
+
+// Calculate the arc lengths of top and bottom ellipses (circumference)
+const topCircumference = 2 * Math.PI * topRadius;
+const bottomCircumference = 2 * Math.PI * bottomRadius;
+
+// The angle of the sector corresponding to the arc length
+const topAngle = topCircumference / slantHeight;
+const bottomAngle = bottomCircumference / slantHeight;
+
+// Draw the development surface (sector) for the conical frustum
+developmentCtx.clearRect(0, 0, developmentCanvas.width, developmentCanvas.height);
+
+// Draw the sector for the frustum development surface
+drawSector(developmentCtx, developmentCenterX, developmentCenterY, slantHeight, topAngle);
+drawSector(developmentCtx, developmentCenterX, developmentCenterY, slantHeight, bottomAngle, topAngle); 
+
+</script>
+
+</body>
+</html>
